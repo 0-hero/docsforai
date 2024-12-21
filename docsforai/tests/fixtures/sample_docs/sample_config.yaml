@@ -1,0 +1,19 @@
+package_name: "sample-package"
+version: "1.0.0"
+source:
+  type: "github"
+  url: "https://github.com/sample/repo"
+docs:
+  path: "docs"
+  framework: "mkdocs"
+output:
+  path: "./output"
+  format: "markdown"
+  single_file: true
+  filename: "sample_docs.md"
+consolidation:
+  include_changelog: true
+  changelog_path: "CHANGELOG.md"
+metadata:
+  author: "Sample Author"
+  description: "A sample package for testing"

@@ -1,0 +1,57 @@
+# DocsForAI Configuration Template
+
+# Basic Information
+package_name: "example-package"
+version: "1.0.0"  # Optional, leave blank or omit for latest version
+
+# Source Repository
+source:
+  type: "github"  # Supported types: github, gitlab, bitbucket
+  url: "https://github.com/username/example-package"
+  branch: "main"  # Optional, default to main branch if not specified
+
+# Documentation Location
+docs:
+  path: "docs"  # Path to the docs folder within the repo
+  framework: "auto"  # Supported frameworks: auto, sphinx, mkdocs, docusaurus, jekyll, hugo, vuepress, docsify, gitbook
+  index_file: "index.rst"  # Optional, helps identify the root of the docs
+
+# Build Settings (Optional)
+build:
+  requirements_file: "requirements.txt"  # Optional, for any additional dependencies
+  environment:  # Optional, for any environment variables needed
+    SOME_API_KEY: "your-api-key"
+
+# Output Settings
+output:
+  path: "./built_docs"  # Where to save the built documentation
+  format: "markdown"  # Output format: markdown, html
+  single_file: true  # Whether to consolidate into a single file
+  filename: "complete_docs.md"  # Name of the consolidated file
+
+# Consolidation Settings
+consolidation:
+  include_changelog: true  # Whether to include the changelog
+  changelog_path: "CHANGELOG.md"  # Path to the changelog file
+  exclude_patterns:  # Patterns for excluding specific parts of docs
+    - "*/tests/*"
+    - "advanced_topics/*.md"
+  custom_order:  # Optional: List of files/folders to define a custom order
+    - "README.md"
+    - "getting_started/"
+    - "api_reference/"
+    - "examples/"
+
+# Additional Metadata (Optional)
+metadata:
+  author: "John Doe"
+  description: "An example package with great documentation"
+  license: "MIT"
+  website: "https://example.com"
+  repository: "https://github.com/username/example-package"
+
+# Advanced Settings (Optional)
+advanced:
+  timeout: 300  # Timeout in seconds for build operations
+  max_file_size: 10000000  # Maximum file size in bytes to process
+  ignore_errors: false  # Whether to continue processing on non-critical errors
