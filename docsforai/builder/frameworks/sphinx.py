@@ -4,19 +4,21 @@ Sphinx documentation parser for DocsForAI.
 
 import logging
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import subprocess
 import shutil
-import yaml
+from docsforai.converter.html_to_md import html_to_md
+from docsforai.utils import run_subprocess_with_logging
 
 logger = logging.getLogger(__name__)
 
-def parse_sphinx(docs_path: Path) -> List[Dict[str, Any]]:
+def parse_sphinx(docs_path: Path, sphinx_args: Optional[List[str]] = None) -> List[Dict[str, Any]]:
     """
     Parse Sphinx documentation.
 
     Args:
         docs_path (Path): Path to the Sphinx documentation source.
+        sphinx_args (Optional[List[str]]): Additional arguments for sphinx-build command.
 
     Returns:
         List[Dict[str, Any]]: Parsed Sphinx documentation.
@@ -27,21 +29,17 @@ def parse_sphinx(docs_path: Path) -> List[Dict[str, Any]]:
     """
     logger.info(f"Parsing Sphinx documentation at {docs_path}")
 
-    # Check for conf.py
     conf_path = docs_path / 'conf.py'
     if not conf_path.exists():
         logger.error("conf.py not found in Sphinx docs directory")
         raise FileNotFoundError("conf.py not found in Sphinx docs directory")
 
-    # Create a temporary build directory
     build_dir = docs_path / '_build'
     build_dir.mkdir(exist_ok=True)
 
     try:
-        # Run Sphinx build
-        subprocess.run(['sphinx-build', '-b', 'html', str(docs_path), str(build_dir)], check=True)
+        run_subprocess_with_logging(['sphinx-build', '-b', 'html', str(docs_path), str(build_dir)], additional_args=sphinx_args)
 
-        # Parse the generated HTML files
         parsed_docs = []
         for html_file in build_dir.rglob('*.html'):
             with html_file.open('r', encoding='utf-8') as f:
@@ -49,35 +47,21 @@ def parse_sphinx(docs_path: Path) -> List[Dict[str, Any]]:
                 parsed_docs.append({
                     'type': 'sphinx',
                     'filename': html_file.relative_to(build_dir).as_posix(),
-                    'content': _html_to_markdown(content)
+                    'content': html_to_md(content)
                 })
 
-        # Parse index.rst for structure
         index_path = docs_path / 'index.rst'
         if index_path.exists():
-            with index_path.open('r', encoding='utf-8') as f:
-                index_content = f.read()
-                parsed_docs.append({
-                    'type': 'sphinx_index',
-                    'filename': 'index.rst',
-                    'content': index_content
-                })
+            parsed_docs.append({
+                'type': 'sphinx_index',
+                'filename': 'index.rst',
+                'content': index_path.read_text(encoding='utf-8')
+            })
 
         return parsed_docs
 
     except subprocess.CalledProcessError as e:
-        logger.error(f"Sphinx build failed: {str(e)}")
+        logger.error(f"Sphinx build process failed")
         raise
     finally:
-        # Clean up build directory
         shutil.rmtree(build_dir, ignore_errors=True)
-
-def _html_to_markdown(html_content: str) -> str:
-    """
-    Convert HTML content to Markdown.
-
-    This is a placeholder function. In a real implementation, you would use
-    a library like html2text or beautifulsoup to convert HTML to Markdown.
-    """
-    # Placeholder implementation
-    return f"Converted Markdown: {html_content[:100]}..."

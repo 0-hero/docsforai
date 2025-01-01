@@ -53,6 +53,7 @@ def parse_config(config_path: Path) -> Dict[str, Any]:
         'source': _validate_source(config.get('source', {})),
         'docs': _validate_docs(config.get('docs', {})),
         'build': _validate_build(config.get('build', {})),
+        'build_args': _validate_build_args(config.get('build_args', {})),
         'output': _validate_output(config.get('output', {})),
         'consolidation': _validate_consolidation(config.get('consolidation', {})),
         'metadata': _validate_metadata(config.get('metadata', {})),
@@ -107,10 +108,74 @@ def _validate_docs(docs: Dict[str, Any]) -> Dict[str, Any]:
 
 def _validate_build(build: Dict[str, Any]) -> Dict[str, Any]:
     """Validate build configuration."""
-    return {
+    validated = {
         'requirements_file': build.get('requirements_file'),
-        'environment': build.get('environment', {})
+        'environment': build.get('environment', {}),
+        'pip_dependencies': []
     }
+    
+    # Validate pip dependencies
+    if 'pip_dependencies' in build:
+        if not isinstance(build['pip_dependencies'], list):
+            raise ValueError("pip_dependencies must be a list of strings")
+        for dep in build['pip_dependencies']:
+            if not isinstance(dep, str):
+                raise ValueError("Each pip dependency must be a string")
+        validated['pip_dependencies'] = build['pip_dependencies']
+    
+    return validated
+
+def _validate_build_args(build_args: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate build arguments configuration."""
+    validated = {}
+    
+    # Validate npm arguments
+    if 'npm_install_args' in build_args:
+        if not isinstance(build_args['npm_install_args'], list):
+            raise ValueError("npm_install_args must be a list of strings")
+        validated['npm_install_args'] = build_args['npm_install_args']
+    
+    if 'npm_build_args' in build_args:
+        if not isinstance(build_args['npm_build_args'], list):
+            raise ValueError("npm_build_args must be a list of strings")
+        validated['npm_build_args'] = build_args['npm_build_args']
+    
+    # Validate doxygen arguments
+    if 'doxygen_args' in build_args:
+        if not isinstance(build_args['doxygen_args'], list):
+            raise ValueError("doxygen_args must be a list of strings")
+        validated['doxygen_args'] = build_args['doxygen_args']
+    
+    # Validate hugo arguments
+    if 'hugo_args' in build_args:
+        if not isinstance(build_args['hugo_args'], list):
+            raise ValueError("hugo_args must be a list of strings")
+        validated['hugo_args'] = build_args['hugo_args']
+    
+    # Validate jekyll arguments
+    if 'bundle_install_args' in build_args:
+        if not isinstance(build_args['bundle_install_args'], list):
+            raise ValueError("bundle_install_args must be a list of strings")
+        validated['bundle_install_args'] = build_args['bundle_install_args']
+    
+    if 'bundle_build_args' in build_args:
+        if not isinstance(build_args['bundle_build_args'], list):
+            raise ValueError("bundle_build_args must be a list of strings")
+        validated['bundle_build_args'] = build_args['bundle_build_args']
+    
+    # Validate sphinx arguments
+    if 'sphinx_args' in build_args:
+        if not isinstance(build_args['sphinx_args'], list):
+            raise ValueError("sphinx_args must be a list of strings")
+        validated['sphinx_args'] = build_args['sphinx_args']
+    
+    # Validate GitBook arguments
+    if 'gitbook_config_file' in build_args:
+        if not isinstance(build_args['gitbook_config_file'], str):
+            raise ValueError("gitbook_config_file must be a string")
+        validated['gitbook_config_file'] = build_args['gitbook_config_file']
+    
+    return validated
 
 def _validate_output(output: Dict[str, Any]) -> Dict[str, Any]:
     """Validate output configuration."""

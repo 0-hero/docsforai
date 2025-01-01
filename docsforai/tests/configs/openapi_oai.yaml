@@ -1,0 +1,40 @@
+package_name: "OpenAPI-Specification"
+version: "latest"
+
+source:
+  type: "github"
+  url: "https://github.com/OAI/OpenAPI-Specification"
+  branch: "main"
+
+docs:
+  # Path directly to an OpenAPI spec file, e.g. petstore.yaml in examples
+  path: "examples/v3.0/petstore.yaml"
+  framework: "openapi"
+  index_file: ""
+
+build:
+  requirements_file: ""
+  environment: {}
+
+output:
+  path: "./built_docs/openapi_oai"
+  format: "markdown"
+  single_file: true
+  filename: "openapi_complete_docs.md"
+
+consolidation:
+  include_changelog: false
+  exclude_patterns: []
+  custom_order: []
+
+metadata:
+  author: "OpenAPI Initiative"
+  description: "OpenAPI Petstore example documentation"
+  license: "Apache-2.0"
+  website: "https://www.openapis.org/"
+  repository: "https://github.com/OAI/OpenAPI-Specification"
+
+advanced:
+  timeout: 300
+  max_file_size: 10000000
+  ignore_errors: false

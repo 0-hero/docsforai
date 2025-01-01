@@ -1,0 +1,39 @@
+package_name: "etcd"
+version: "latest"
+
+source:
+  type: "github"
+  url: "https://github.com/etcd-io/etcd"
+  branch: "main"
+
+docs:
+  path: "."
+  framework: "godoc"
+  index_file: ""
+
+build:
+  requirements_file: ""
+  environment: {}
+
+output:
+  path: "./built_docs/godoc_etcd"
+  format: "markdown"
+  single_file: true
+  filename: "etcd_complete_docs.md"
+
+consolidation:
+  include_changelog: false
+  exclude_patterns: []
+  custom_order: []
+
+metadata:
+  author: "etcd Authors"
+  description: "etcd documentation generated from Go code"
+  license: "Apache-2.0"
+  website: "https://etcd.io/"
+  repository: "https://github.com/etcd-io/etcd"
+
+advanced:
+  timeout: 300
+  max_file_size: 10000000
+  ignore_errors: false

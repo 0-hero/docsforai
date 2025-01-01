@@ -1,0 +1,42 @@
+package_name: "ethereumbook"
+version: "latest"
+
+source:
+  type: "github"
+  url: "https://github.com/ethereumbook/ethereumbook"
+  branch: "develop"
+
+docs:
+  path: "."
+  framework: "gitbook"
+  index_file: "README.md"
+
+build:
+  requirements_file: ""
+  environment: {}
+
+build_args:
+  gitbook_config_file: "atlas.json"
+
+output:
+  path: "./built_docs/gitbook_ethereumbook"
+  format: "markdown"
+  single_file: true
+  filename: "ethereumbook_complete_docs.md"
+
+consolidation:
+  include_changelog: false
+  exclude_patterns: []
+  custom_order: []
+
+metadata:
+  author: "Andreas M. Antonopoulos and Gavin Wood"
+  description: "Mastering Ethereum documentation"
+  license: "CC-BY-SA 4.0"
+  website: "https://ethereumbook.info/"
+  repository: "https://github.com/ethereumbook/ethereumbook"
+
+advanced:
+  timeout: 300
+  max_file_size: 10000000
+  ignore_errors: false

@@ -3,25 +3,24 @@ Converter for reStructuredText to Markdown.
 """
 
 import logging
-from pathlib import Path
 from docutils.core import publish_parts
 from docutils.writers import Writer
-from docutils.nodes import NodeVisitor, Node
-from docutils import nodes
+from docutils.nodes import NodeVisitor
+from docutils.writers.html4css1 import Writer as HTMLWriter
 
 logger = logging.getLogger(__name__)
 
 class MarkdownWriter(Writer):
     def __init__(self):
-        Writer.__init__(self)
+        super().__init__()
         self.translator_class = MarkdownTranslator
 
 class MarkdownTranslator(NodeVisitor):
     def __init__(self, document):
-        NodeVisitor.__init__(self, document)
+        super().__init__(document)
         self.output = []
-        self.list_depth = 0
 
+    # Minimal AST handling
     def visit_paragraph(self, node):
         self.output.append('')
 
@@ -29,23 +28,10 @@ class MarkdownTranslator(NodeVisitor):
         self.output.append('')
 
     def visit_title(self, node):
-        self.output.append(f"{'#' * (node.parent.index(node) + 1)} ")
+        self.output.append('# ')
 
     def visit_Text(self, node):
         self.output.append(node.astext())
-
-    def visit_list_item(self, node):
-        self.output.append("  " * self.list_depth + "- ")
-        self.list_depth += 1
-
-    def depart_list_item(self, node):
-        self.list_depth -= 1
-
-    def visit_literal_block(self, node):
-        self.output.append("```")
-
-    def depart_literal_block(self, node):
-        self.output.append("```")
 
     def unknown_visit(self, node):
         pass
@@ -54,18 +40,6 @@ class MarkdownTranslator(NodeVisitor):
         pass
 
 def rst_to_md(rst_content: str) -> str:
-    """
-    Convert reStructuredText to Markdown.
-
-    Args:
-        rst_content (str): reStructuredText content.
-
-    Returns:
-        str: Converted Markdown content.
-
-    Raises:
-        ValueError: If conversion fails.
-    """
     try:
         parts = publish_parts(source=rst_content, writer=MarkdownWriter())
         return ''.join(parts['whole'])

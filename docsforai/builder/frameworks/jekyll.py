@@ -1,21 +1,29 @@
 """
 Jekyll documentation parser for DocsForAI.
+
+Requires:
+- Ruby, bundler, and jekyll in PATH
 """
 
 import logging
 from pathlib import Path
-from typing import List, Dict, Any
+import shutil
+from typing import List, Dict, Any, Optional
 import yaml
 import subprocess
+from docsforai.converter.html_to_md import html_to_md
+from docsforai.utils import run_subprocess_with_logging
 
 logger = logging.getLogger(__name__)
 
-def parse_jekyll(docs_path: Path) -> List[Dict[str, Any]]:
+def parse_jekyll(docs_path: Path, bundle_install_args: Optional[List[str]] = None, bundle_build_args: Optional[List[str]] = None) -> List[Dict[str, Any]]:
     """
     Parse Jekyll documentation.
 
     Args:
         docs_path (Path): Path to the Jekyll documentation source.
+        bundle_install_args (Optional[List[str]]): Additional arguments for bundle install command.
+        bundle_build_args (Optional[List[str]]): Additional arguments for bundle exec jekyll build command.
 
     Returns:
         List[Dict[str, Any]]: Parsed Jekyll documentation.
@@ -40,8 +48,7 @@ def parse_jekyll(docs_path: Path) -> List[Dict[str, Any]]:
         raise
 
     parsed_docs = []
-
-    # Parse markdown files
+    # Parse .md
     for md_file in docs_path.rglob('*.md'):
         with md_file.open('r', encoding='utf-8') as f:
             content = f.read()
@@ -51,38 +58,24 @@ def parse_jekyll(docs_path: Path) -> List[Dict[str, Any]]:
                 'content': content
             })
 
-    # Build Jekyll site
     build_dir = docs_path / '_site'
     try:
-        subprocess.run(['bundle', 'install'], cwd=str(docs_path), check=True)
-        subprocess.run(['bundle', 'exec', 'jekyll', 'build'], cwd=str(docs_path), check=True)
+        run_subprocess_with_logging(['bundle', 'install'], cwd=docs_path, additional_args=bundle_install_args)
+        run_subprocess_with_logging(['bundle', 'exec', 'jekyll', 'build'], cwd=docs_path, additional_args=bundle_build_args)
 
-        # Parse built HTML files
         for html_file in build_dir.rglob('*.html'):
             with html_file.open('r', encoding='utf-8') as f:
                 content = f.read()
                 parsed_docs.append({
                     'type': 'jekyll_built',
                     'filename': html_file.relative_to(build_dir).as_posix(),
-                    'content': _html_to_markdown(content)
+                    'content': html_to_md(content)
                 })
 
     except subprocess.CalledProcessError as e:
-        logger.error(f"Jekyll build failed: {str(e)}")
+        logger.error(f"Jekyll build process failed")
         raise
     finally:
-        # Clean up build directory
-        import shutil
         shutil.rmtree(build_dir, ignore_errors=True)
 
     return parsed_docs
-
-def _html_to_markdown(html_content: str) -> str:
-    """
-    Convert HTML content to Markdown.
-
-    This is a placeholder function. In a real implementation, you would use
-    a library like html2text or beautifulsoup to convert HTML to Markdown.
-    """
-    # Placeholder implementation
-    return f"Converted Markdown: {html_content[:100]}..."

@@ -1,5 +1,8 @@
 """
 Godoc documentation parser for DocsForAI.
+
+Requires:
+- `go` installed.
 """
 
 import logging
@@ -7,6 +10,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 import subprocess
 import re
+from docsforai.utils.subprocess_utils import run_subprocess_with_logging
 
 logger = logging.getLogger(__name__)
 
@@ -26,15 +30,12 @@ def parse_godoc(docs_path: Path) -> List[Dict[str, Any]]:
     logger.info(f"Parsing Godoc documentation at {docs_path}")
 
     try:
-        # Run Godoc
-        result = subprocess.run(
-            ['go', 'doc', '-all', './...'],
-            check=True,
+        result = run_subprocess_with_logging(
+            ['go', 'doc', '-all'],
             cwd=str(docs_path),
             capture_output=True,
             text=True
         )
-
         parsed_docs = _parse_godoc_output(result.stdout)
         return parsed_docs
 

@@ -1,0 +1,39 @@
+package_name: "vuepress-next"
+version: "latest"
+
+source:
+  type: "github"
+  url: "https://github.com/vuepress/vuepress-next"
+  branch: "main"
+
+docs:
+  path: "docs"
+  framework: "vuepress"
+  index_file: "README.md"
+
+build:
+  requirements_file: ""
+  environment: {}
+
+output:
+  path: "./built_docs/vuepress_next"
+  format: "markdown"
+  single_file: true
+  filename: "vuepress_complete_docs.md"
+
+consolidation:
+  include_changelog: false
+  exclude_patterns: []
+  custom_order: []
+
+metadata:
+  author: "VuePress community"
+  description: "VuePress next documentation"
+  license: "MIT"
+  website: "https://v2.vuepress.vuejs.org/"
+  repository: "https://github.com/vuepress/vuepress-next"
+
+advanced:
+  timeout: 300
+  max_file_size: 10000000
+  ignore_errors: false

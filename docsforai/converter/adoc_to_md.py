@@ -1,5 +1,8 @@
 """
 Converter for AsciiDoc to Markdown.
+
+Requires:
+- `pandoc` in PATH
 """
 
 import logging
@@ -22,7 +25,6 @@ def adoc_to_md(adoc_content: str) -> str:
         ValueError: If conversion fails.
     """
     try:
-        # Use Pandoc for conversion
         result = subprocess.run(
             ['pandoc', '-f', 'asciidoc', '-t', 'markdown'],
             input=adoc_content,

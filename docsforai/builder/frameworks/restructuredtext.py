@@ -1,5 +1,8 @@
 """
 reStructuredText documentation parser for DocsForAI.
+
+Requires:
+- docutils
 """
 
 import logging
@@ -23,25 +26,19 @@ def parse_restructuredtext(docs_path: Path) -> List[Dict[str, Any]]:
     logger.info(f"Parsing reStructuredText documentation at {docs_path}")
 
     parsed_docs = []
-
     for rst_file in docs_path.rglob('*.rst'):
         try:
-            with rst_file.open('r', encoding='utf-8') as f:
-                content = f.read()
-
-            # Convert reStructuredText to HTML
+            content = rst_file.read_text(encoding='utf-8')
             html_parts = publish_parts(
                 source=content,
                 writer=Writer(),
                 settings_overrides={'output_encoding': 'unicode'}
             )
-
             parsed_docs.append({
                 'type': 'restructuredtext',
                 'filename': rst_file.relative_to(docs_path).with_suffix('.html').as_posix(),
                 'content': html_parts['whole']
             })
-
         except Exception as e:
             logger.error(f"Error parsing reStructuredText file {rst_file}: {str(e)}")
 

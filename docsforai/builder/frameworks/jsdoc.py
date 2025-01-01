@@ -1,5 +1,8 @@
 """
 JSDoc documentation parser for DocsForAI.
+
+Requires:
+- Node.js, npm, jsdoc, and a JSON template (like `jsdoc-json`)
 """
 
 import logging
@@ -7,6 +10,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 import subprocess
 import json
+import shutil
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +34,6 @@ def parse_jsdoc(docs_path: Path) -> List[Dict[str, Any]]:
     output_dir.mkdir(exist_ok=True)
 
     try:
-        # Run JSDoc
         subprocess.run([
             'jsdoc',
             '-r',
@@ -41,8 +44,6 @@ def parse_jsdoc(docs_path: Path) -> List[Dict[str, Any]]:
         ], check=True, cwd=str(docs_path))
 
         parsed_docs = []
-
-        # Parse JSON output
         json_file = output_dir / 'jsdoc.json'
         with json_file.open('r') as f:
             jsdoc_data = json.load(f)
@@ -50,7 +51,6 @@ def parse_jsdoc(docs_path: Path) -> List[Dict[str, Any]]:
         for item in jsdoc_data:
             content = _parse_jsdoc_item(item)
             filename = f"{item['name']}.md"
-
             parsed_docs.append({
                 'type': f"jsdoc_{item['kind']}",
                 'filename': filename,
@@ -66,8 +66,6 @@ def parse_jsdoc(docs_path: Path) -> List[Dict[str, Any]]:
         logger.error(f"Invalid JSDoc JSON output: {str(e)}")
         raise
     finally:
-        # Clean up output directory
-        import shutil
         shutil.rmtree(output_dir, ignore_errors=True)
 
 def _parse_jsdoc_item(item: Dict[str, Any]) -> str:
@@ -81,12 +79,14 @@ def _parse_jsdoc_item(item: Dict[str, Any]) -> str:
     if 'params' in item:
         content.append("\n## Parameters\n")
         for param in item['params']:
-            content.append(f"- {param['name']} ({param['type']['names'][0]}): {param['description']}")
+            ptype = param.get('type', {}).get('names', ['any'])[0]
+            content.append(f"- {param['name']} ({ptype}): {param.get('description','')}")
 
     if 'returns' in item:
         content.append("\n## Returns\n")
         for ret in item['returns']:
-            content.append(f"- {ret['type']['names'][0]}: {ret.get('description', '')}")
+            rtype = ret.get('type', {}).get('names', ['any'])[0]
+            content.append(f"- {rtype}: {ret.get('description', '')}")
 
     if 'examples' in item:
         content.append("\n## Examples\n")

@@ -9,6 +9,7 @@ source:
   type: "github"  # Supported types: github, gitlab, bitbucket
   url: "https://github.com/username/example-package"
   branch: "main"  # Optional, default to main branch if not specified
+  git_args: ["--depth", "1"]  # Optional, additional arguments for git clone
 
 # Documentation Location
 docs:
@@ -21,6 +22,32 @@ build:
   requirements_file: "requirements.txt"  # Optional, for any additional dependencies
   environment:  # Optional, for any environment variables needed
     SOME_API_KEY: "your-api-key"
+  pip_dependencies:  # Optional, additional pip packages to install
+    - "sphinx-rtd-theme>=1.0.0"
+    - "sphinx-autodoc-typehints>=1.12.0"
+    - "myst-parser>=0.15.0"
+
+# Build Arguments for Different Frameworks (Optional)
+build_args:
+  # Docusaurus specific arguments
+  npm_install_args: ["--legacy-peer-deps"]  # Additional arguments for npm install
+  npm_build_args: ["--no-source-maps"]      # Additional arguments for npm run build
+
+  # Doxygen specific arguments
+  doxygen_args: ["--quiet"]  # Additional arguments for doxygen command
+
+  # Hugo specific arguments
+  hugo_args: ["--minify"]  # Additional arguments for hugo build
+
+  # Jekyll specific arguments
+  bundle_install_args: ["--deployment"]          # Additional arguments for bundle install
+  bundle_build_args: ["--quiet", "--incremental"]  # Additional arguments for bundle exec jekyll build
+
+  # Sphinx specific arguments
+  sphinx_args: ["-W", "--keep-going"]  # Additional arguments for sphinx-build
+
+  # GitBook specific arguments
+  gitbook_config_file: "custom.json"  # Optional, custom configuration file name (default: book.json)
 
 # Output Settings
 output:

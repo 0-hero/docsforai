@@ -1,5 +1,8 @@
 """
 AsciiDoc documentation parser for DocsForAI.
+
+Requires:
+- `asciidoctor` CLI installed (usually `gem install asciidoctor`).
 """
 
 import logging

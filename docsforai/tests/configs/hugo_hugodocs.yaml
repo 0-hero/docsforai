@@ -1,0 +1,39 @@
+package_name: "hugo"
+version: "latest"
+
+source:
+  type: "github"
+  url: "https://github.com/gohugoio/hugoDocs"
+  branch: "master"
+
+docs:
+  path: "."  # Hugo config and content at root of this repo
+  framework: "hugo"
+  index_file: "content/_index.md"
+
+build:
+  requirements_file: ""
+  environment: {}
+
+output:
+  path: "./built_docs/hugo_hugodocs"
+  format: "markdown"
+  single_file: true
+  filename: "hugo_complete_docs.md"
+
+consolidation:
+  include_changelog: false
+  exclude_patterns: []
+  custom_order: []
+
+metadata:
+  author: "Hugo Authors"
+  description: "Hugo documentation"
+  license: "Apache-2.0"
+  website: "https://gohugo.io/"
+  repository: "https://github.com/gohugoio/hugoDocs"
+
+advanced:
+  timeout: 300
+  max_file_size: 10000000
+  ignore_errors: false

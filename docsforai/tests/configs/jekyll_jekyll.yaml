@@ -1,0 +1,39 @@
+package_name: "jekyll"
+version: "latest"
+
+source:
+  type: "github"
+  url: "https://github.com/jekyll/jekyll"
+  branch: "master"
+
+docs:
+  path: "docs"
+  framework: "jekyll"
+  index_file: "index.md"
+
+build:
+  requirements_file: ""
+  environment: {}
+
+output:
+  path: "./built_docs/jekyll_jekyll"
+  format: "markdown"
+  single_file: true
+  filename: "jekyll_complete_docs.md"
+
+consolidation:
+  include_changelog: false
+  exclude_patterns: []
+  custom_order: []
+
+metadata:
+  author: "Jekyll community"
+  description: "Jekyll static site generator docs"
+  license: "MIT"
+  website: "https://jekyllrb.com"
+  repository: "https://github.com/jekyll/jekyll"
+
+advanced:
+  timeout: 300
+  max_file_size: 10000000
+  ignore_errors: false

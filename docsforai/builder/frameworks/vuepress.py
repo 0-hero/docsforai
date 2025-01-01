@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import List, Dict, Any
 import json
 import subprocess
+import shutil
+from docsforai.converter.html_to_md import html_to_md
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +36,7 @@ def parse_vuepress(docs_path: Path) -> List[Dict[str, Any]]:
 
     parsed_docs = []
 
-    # Parse markdown files
+    # parse .md
     for md_file in docs_path.rglob('*.md'):
         with md_file.open('r', encoding='utf-8') as f:
             content = f.read()
@@ -44,23 +46,20 @@ def parse_vuepress(docs_path: Path) -> List[Dict[str, Any]]:
                 'content': content
             })
 
-    # Build VuePress site
     build_dir = docs_path / '.vuepress' / 'dist'
     try:
         subprocess.run(['npm', 'install'], cwd=str(docs_path), check=True)
         subprocess.run(['npx', 'vuepress', 'build', str(docs_path)], check=True)
 
-        # Parse built HTML files
         for html_file in build_dir.rglob('*.html'):
             with html_file.open('r', encoding='utf-8') as f:
                 content = f.read()
                 parsed_docs.append({
                     'type': 'vuepress_built',
                     'filename': html_file.relative_to(build_dir).as_posix(),
-                    'content': _html_to_markdown(content)
+                    'content': html_to_md(content)
                 })
 
-        # Extract sidebar configuration
         sidebar_config = _extract_sidebar_config(config_path)
         if sidebar_config:
             parsed_docs.append({
@@ -73,8 +72,6 @@ def parse_vuepress(docs_path: Path) -> List[Dict[str, Any]]:
         logger.error(f"VuePress build failed: {str(e)}")
         raise
     finally:
-        # Clean up build directory
-        import shutil
         shutil.rmtree(build_dir, ignore_errors=True)
 
     return parsed_docs
@@ -92,28 +89,16 @@ def _extract_sidebar_config(config_path: Path) -> Dict[str, Any]:
     Raises:
         json.JSONDecodeError: If sidebar configuration is invalid.
     """
-    with config_path.open('r') as f:
-        content = f.read()
-        sidebar_start = content.find('sidebar:')
-        if sidebar_start != -1:
-            sidebar_end = content.find('}', sidebar_start)
+    content = config_path.read_text()
+    sidebar_start = content.find('sidebar:')
+    if sidebar_start != -1:
+        sidebar_end = content.find('}', sidebar_start)
+        if sidebar_end != -1:
             sidebar_str = content[sidebar_start:sidebar_end+1]
-            # Convert JS object to JSON
-            sidebar_json = sidebar_str.replace("sidebar:", '"sidebar":')
-            sidebar_json = sidebar_json.replace("'", '"')
+            sidebar_json = sidebar_str.replace("sidebar:", '"sidebar":').replace("'", '"')
             try:
                 return json.loads('{' + sidebar_json + '}')
             except json.JSONDecodeError as e:
                 logger.error(f"Invalid sidebar configuration: {str(e)}")
                 raise
     return {}
-
-def _html_to_markdown(html_content: str) -> str:
-    """
-    Convert HTML content to Markdown.
-
-    This is a placeholder function. In a real implementation, you would use
-    a library like html2text or beautifulsoup to convert HTML to Markdown.
-    """
-    # Placeholder implementation
-    return f"Converted Markdown: {html_content[:100]}..."

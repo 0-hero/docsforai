@@ -21,18 +21,15 @@ def parse_markdown(docs_path: Path) -> List[Dict[str, Any]]:
     logger.info(f"Parsing Markdown documentation at {docs_path}")
 
     parsed_docs = []
-
     for md_file in docs_path.rglob('*.md'):
         try:
             with md_file.open('r', encoding='utf-8') as f:
                 content = f.read()
-
             parsed_docs.append({
                 'type': 'markdown',
                 'filename': md_file.relative_to(docs_path).as_posix(),
                 'content': content
             })
-
         except Exception as e:
             logger.error(f"Error parsing Markdown file {md_file}: {str(e)}")
 

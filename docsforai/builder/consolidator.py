@@ -46,47 +46,35 @@ def consolidate_documentation(
             docs_by_type[doc_type] = []
         docs_by_type[doc_type].append(doc)
 
-    # Add table of contents
+    # Table of contents
     consolidated_content.append("## Table of Contents\n\n")
     for doc_type, docs in docs_by_type.items():
-        # Add section header for document type
         type_header = doc_type.replace('_', ' ').title()
         consolidated_content.append(f"### {type_header}\n\n")
-        
-        # Add links to documents of this type
         for doc in docs:
             if consolidation_config.get('exclude_patterns'):
                 if any(pattern in doc['filename'] for pattern in consolidation_config['exclude_patterns']):
                     logger.info(f"Excluding {doc['filename']} based on exclude patterns")
                     continue
-            
             link_text = doc['filename'].replace('_', ' ').replace('.md', '')
             anchor = doc['filename'].lower().replace(' ', '-').replace('.', '')
             consolidated_content.append(f"- [{link_text}](#{anchor})\n")
         consolidated_content.append("\n")
-    
+
     consolidated_content.append("\n---\n\n")
 
     # Add content grouped by type
     for doc_type, docs in docs_by_type.items():
-        # Add section header for document type
         type_header = doc_type.replace('_', ' ').title()
         consolidated_content.append(f"# {type_header} Documentation\n\n")
-        
-        # Add each document of this type
         for doc in docs:
             if consolidation_config.get('exclude_patterns'):
                 if any(pattern in doc['filename'] for pattern in consolidation_config['exclude_patterns']):
                     continue
-
-            # Add document header
             consolidated_content.append(f"## {doc['filename']}\n\n")
-            
-            # Add document content
             consolidated_content.append(doc['content'])
             consolidated_content.append("\n\n---\n\n")
 
-    # Add changelog if specified
     if consolidation_config.get('include_changelog'):
         changelog_path = consolidation_config.get('changelog_path')
         if changelog_path:
@@ -100,6 +88,7 @@ def consolidate_documentation(
 
     logger.info("Documentation consolidation completed")
     return ''.join(consolidated_content)
+
 
 def _get_changelog(changelog_path: Path) -> str:
     """

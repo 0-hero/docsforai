@@ -60,11 +60,9 @@ def _get_specific_version(package_name: str, version: str) -> str:
     url = f"{GITHUB_API_BASE}/repos/{REPO_OWNER}/{REPO_NAME}/contents/{package_name}/{version}.md"
     response = requests.get(url)
     response.raise_for_status()
-
     content = response.json()
     if 'content' not in content:
         raise ValueError(f"Version {version} not found for {package_name}")
-
     return base64.b64decode(content['content']).decode('utf-8')
 
 def _get_latest_version(package_name: str) -> str:
@@ -72,13 +70,12 @@ def _get_latest_version(package_name: str) -> str:
     url = f"{GITHUB_API_BASE}/repos/{REPO_OWNER}/{REPO_NAME}/contents/{package_name}"
     response = requests.get(url)
     response.raise_for_status()
-
     versions = [item['name'] for item in response.json() if item['type'] == 'file' and item['name'].endswith('.md')]
     if not versions:
         raise ValueError(f"No documentation found for {package_name}")
-
     latest_version = max(versions, key=lambda v: _version_key(v.rstrip('.md')))
     return _get_specific_version(package_name, latest_version.rstrip('.md'))
+
 
 def _version_key(version: str) -> tuple:
     """Convert version string to a tuple for comparison."""

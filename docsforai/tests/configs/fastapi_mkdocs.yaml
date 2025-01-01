@@ -1,0 +1,39 @@
+package_name: "fastapi"
+version: "latest"
+
+source:
+  type: "github"
+  url: "https://github.com/tiangolo/fastapi"
+  branch: "master"
+
+docs:
+  path: "docs/en"
+  framework: "mkdocs"
+  index_file: "docs/index.md"
+
+build:
+  requirements_file: ""
+  environment: {}
+
+output:
+  path: "./built_docs/fastapi_mkdocs"
+  format: "markdown"
+  single_file: true
+  filename: "fastapi_complete_docs.md"
+
+consolidation:
+  include_changelog: false
+  exclude_patterns: []
+  custom_order: []
+
+metadata:
+  author: "Sebastian Ramirez"
+  description: "FastAPI framework docs"
+  license: "MIT"
+  website: "https://fastapi.tiangolo.com"
+  repository: "https://github.com/tiangolo/fastapi"
+
+advanced:
+  timeout: 300
+  max_file_size: 10000000
+  ignore_errors: false

@@ -1,5 +1,8 @@
 """
 OpenAPI documentation parser for DocsForAI.
+
+Requires:
+- Just Python-based YAML/JSON parsing unless you want to do more advanced stuff
 """
 
 import logging
@@ -54,18 +57,14 @@ def parse_openapi(docs_path: Path) -> List[Dict[str, Any]]:
 def _generate_markdown_from_openapi(spec: Dict[str, Any]) -> str:
     """Generate Markdown documentation from OpenAPI specification."""
     content = []
-    
-    # Title and description
     content.append(f"# {spec.get('info', {}).get('title', 'API Documentation')}")
     content.append(f"\n{spec.get('info', {}).get('description', '')}\n")
 
-    # Servers
     if 'servers' in spec:
         content.append("## Servers")
         for server in spec['servers']:
             content.append(f"- {server.get('url')}: {server.get('description', '')}")
 
-    # Paths
     if 'paths' in spec:
         content.append("\n## Endpoints")
         for path, methods in spec['paths'].items():
@@ -74,16 +73,13 @@ def _generate_markdown_from_openapi(spec: Dict[str, Any]) -> str:
                 content.append(f"\n#### {method.upper()}")
                 content.append(f"\n{details.get('summary', '')}")
                 content.append(f"\n{details.get('description', '')}")
-
                 if 'parameters' in details:
                     content.append("\nParameters:")
                     for param in details['parameters']:
                         content.append(f"- {param.get('name')} ({param.get('in')}): {param.get('description', '')}")
-
                 if 'requestBody' in details:
                     content.append("\nRequest Body:")
                     content.append(f"{details['requestBody'].get('description', '')}")
-
                 if 'responses' in details:
                     content.append("\nResponses:")
                     for status, response in details['responses'].items():

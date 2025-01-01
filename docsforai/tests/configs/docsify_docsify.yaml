@@ -1,0 +1,39 @@
+package_name: "docsify"
+version: "latest"
+
+source:
+  type: "github"
+  url: "https://github.com/docsifyjs/docsify"
+  branch: "main"
+
+docs:
+  path: "docs"
+  framework: "docsify"
+  index_file: "index.html"
+
+build:
+  requirements_file: ""
+  environment: {}
+
+output:
+  path: "./built_docs/docsify_docsify"
+  format: "markdown"
+  single_file: true
+  filename: "docsify_complete_docs.md"
+
+consolidation:
+  include_changelog: false
+  exclude_patterns: []
+  custom_order: []
+
+metadata:
+  author: "Docsify community"
+  description: "Docsify documentation"
+  license: "MIT"
+  website: "https://docsify.js.org/"
+  repository: "https://github.com/docsifyjs/docsify"
+
+advanced:
+  timeout: 300
+  max_file_size: 10000000
+  ignore_errors: false

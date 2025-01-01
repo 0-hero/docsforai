@@ -1,5 +1,8 @@
 """
 API Blueprint documentation parser for DocsForAI.
+
+Requires:
+- `aglio` (Node.js-based) installed globally or accessible in PATH.
 """
 
 import logging

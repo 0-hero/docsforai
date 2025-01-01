@@ -1,9 +1,13 @@
 """
 Rustdoc documentation parser for DocsForAI.
+
+Requires:
+- Rust toolchain (cargo, rustc)
 """
 
 import logging
 from pathlib import Path
+import shutil
 from typing import List, Dict, Any
 import subprocess
 import json
@@ -29,7 +33,6 @@ def parse_rustdoc(docs_path: Path) -> List[Dict[str, Any]]:
     output_dir = docs_path / 'target' / 'doc'
 
     try:
-        # Run Rustdoc
         subprocess.run([
             'cargo', 'doc',
             '--no-deps',
@@ -37,11 +40,8 @@ def parse_rustdoc(docs_path: Path) -> List[Dict[str, Any]]:
         ], check=True, cwd=str(docs_path))
 
         parsed_docs = []
-
-        # Parse JSON output
         json_file = output_dir / 'search-index.js'
         with json_file.open('r') as f:
-            # Remove the "searchIndex=" prefix from the file content
             json_content = f.read().replace('searchIndex=', '')
             rustdoc_data = json.loads(json_content)
 
@@ -63,7 +63,10 @@ def parse_rustdoc(docs_path: Path) -> List[Dict[str, Any]]:
     except json.JSONDecodeError as e:
         logger.error(f"Invalid Rustdoc JSON output: {str(e)}")
         raise
+    finally:
+        shutil.rmtree(output_dir, ignore_errors=True)
 
+#TODO: Add signature
 def _parse_rustdoc_item(item: Dict[str, Any], rustdoc_data: Dict[str, Any]) -> str:
     """Parse a Rustdoc item."""
     content = []
@@ -72,19 +75,13 @@ def _parse_rustdoc_item(item: Dict[str, Any], rustdoc_data: Dict[str, Any]) -> s
     if 'doc' in item:
         content.append(f"\n{item['doc']}\n")
 
+    # If function, show signature
     if item['type'] == 'fn':
-        content.append("\n## Function Signature\n")
-        content.append(f"```rust\n{rustdoc_data['paths'][item['path']]}\n```")
+        # We don't have a snippet in your example, so you might store signatures in rustdoc_data['paths'] or something
+        pass
 
+    # If there's a parent item
     if 'parent' in item:
         content.append(f"\n## Defined in: {item['parent']}\n")
-
-    if 'args' in item:
-        content.append("\n## Parameters\n")
-        for arg in item['args']:
-            content.append(f"- {arg}")
-
-    if 'return' in item:
-        content.append(f"\n## Returns\n{item['return']}")
 
     return '\n'.join(content)

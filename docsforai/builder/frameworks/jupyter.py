@@ -1,5 +1,8 @@
 """
 Jupyter Notebook documentation parser for DocsForAI.
+
+Requires:
+- Python packages: nbformat, nbconvert
 """
 
 import logging
@@ -30,9 +33,7 @@ def parse_jupyter(docs_path: Path) -> List[Dict[str, Any]]:
             with ipynb_file.open('r', encoding='utf-8') as f:
                 nb = nbformat.read(f, as_version=4)
 
-            # Convert notebook to Markdown
             (markdown, _) = exporter.from_notebook_node(nb)
-
             parsed_docs.append({
                 'type': 'jupyter',
                 'filename': ipynb_file.relative_to(docs_path).with_suffix('.md').as_posix(),

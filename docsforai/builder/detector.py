@@ -518,7 +518,7 @@ def detect_framework(repo_path: Path) -> str:
             logger.info(f"Detected framework: {framework}")
             return framework
 
-    # If no specific framework is detected, check for common documentation files
+    # If not found, fallback
     common_docs = ['README.md', 'README.rst', 'index.md', 'index.rst']
     for doc in common_docs:
         if (repo_path / doc).exists():

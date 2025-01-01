@@ -1,5 +1,8 @@
 """
 Read the Docs documentation parser for DocsForAI.
+
+Requires:
+- `.readthedocs.yml` in the project root
 """
 
 import logging
@@ -42,27 +45,23 @@ def parse_readthedocs(docs_path: Path) -> List[Dict[str, Any]]:
 
     parsed_docs = []
 
-    # Extract project information
     project_slug = config.get('name', '')
     if not project_slug:
         logger.error("Project name not found in .readthedocs.yml")
         raise ValueError("Project name not found in .readthedocs.yml")
 
-    # Fetch documentation from Read the Docs API
     api_url = f"https://readthedocs.org/api/v3/projects/{project_slug}/"
     try:
         response = requests.get(api_url)
         response.raise_for_status()
         project_data = response.json()
 
-        # Parse project overview
         parsed_docs.append({
             'type': 'readthedocs_overview',
             'filename': 'project_overview.md',
             'content': f"# {project_data['name']}\n\n{project_data['description']}"
         })
 
-        # Fetch and parse documentation pages
         for version in project_data['versions']:
             version_url = urljoin(api_url, f"versions/{version['slug']}/")
             version_response = requests.get(version_url)
@@ -73,7 +72,7 @@ def parse_readthedocs(docs_path: Path) -> List[Dict[str, Any]]:
                 page_url = page['url']
                 page_response = requests.get(page_url)
                 page_response.raise_for_status()
-                
+
                 parsed_docs.append({
                     'type': 'readthedocs_page',
                     'filename': f"{version['slug']}/{page['path']}",

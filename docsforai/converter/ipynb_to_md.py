@@ -23,15 +23,9 @@ def ipynb_to_md(ipynb_content: str) -> str:
         ValueError: If conversion fails.
     """
     try:
-        # Parse the notebook JSON
         notebook = nbformat.reads(ipynb_content, as_version=4)
-
-        # Create a Markdown exporter
         exporter = MarkdownExporter()
-
-        # Convert the notebook to Markdown
         markdown, _ = exporter.from_notebook_node(notebook)
-
         return markdown
     except json.JSONDecodeError as e:
         logger.error(f"Invalid Jupyter Notebook JSON: {str(e)}")

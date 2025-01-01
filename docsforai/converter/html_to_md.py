@@ -20,16 +20,17 @@ def html_to_md(html_content: str) -> str:
         ValueError: If conversion fails.
     """
     try:
-        # Clean the HTML using BeautifulSoup
+        # First, clean the HTML if desired
         soup = BeautifulSoup(html_content, 'html.parser')
         clean_html = soup.prettify()
 
-        # Convert to Markdown using html2text
-        h = html2text.HTML2Text()
-        h.ignore_links = False
-        h.ignore_images = False
-        h.ignore_tables = False
-        markdown = h.handle(clean_html)
+        # Convert to Markdown with html2text
+        converter = html2text.HTML2Text()
+        converter.ignore_links = False
+        converter.ignore_images = False
+        converter.ignore_tables = False
+        # You can tweak more settings if you want
+        markdown = converter.handle(clean_html)
 
         return markdown.strip()
     except Exception as e:

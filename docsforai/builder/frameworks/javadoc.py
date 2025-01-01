@@ -1,9 +1,14 @@
 """
 Javadoc documentation parser for DocsForAI.
+
+Requires:
+- `javac` and `javadoc` in PATH
+- The doclet JAR (xmldoclet) if you want XML outputs
 """
 
 import logging
 from pathlib import Path
+import shutil
 from typing import List, Dict, Any
 import subprocess
 import xml.etree.ElementTree as ET
@@ -29,7 +34,6 @@ def parse_javadoc(docs_path: Path) -> List[Dict[str, Any]]:
     output_dir.mkdir(exist_ok=True)
 
     try:
-        # Run Javadoc
         subprocess.run([
             'javadoc',
             '-d', str(output_dir),
@@ -40,8 +44,6 @@ def parse_javadoc(docs_path: Path) -> List[Dict[str, Any]]:
         ], check=True, cwd=str(docs_path))
 
         parsed_docs = []
-
-        # Parse XML output
         for xml_file in output_dir.glob('*.xml'):
             tree = ET.parse(xml_file)
             root = tree.getroot()
@@ -62,14 +64,12 @@ def parse_javadoc(docs_path: Path) -> List[Dict[str, Any]]:
         logger.error(f"Javadoc generation failed: {str(e)}")
         raise
     finally:
-        # Clean up output directory
-        import shutil
         shutil.rmtree(output_dir, ignore_errors=True)
 
 def _parse_class(class_elem: ET.Element) -> str:
     """Parse a class element from Javadoc XML."""
     content = []
-    class_name = class_elem.get('name')
+    class_name = class_elem.get('name', 'UnknownClass')
     content.append(f"# Class: {class_name}\n")
 
     comment = class_elem.find('comment')
@@ -77,7 +77,7 @@ def _parse_class(class_elem: ET.Element) -> str:
         content.append(f"\n{comment.text.strip()}\n")
 
     for method in class_elem.findall('.//method'):
-        method_name = method.get('name')
+        method_name = method.get('name', 'UnknownMethod')
         content.append(f"\n## Method: {method_name}\n")
 
         method_comment = method.find('comment')
@@ -91,7 +91,7 @@ def _parse_class(class_elem: ET.Element) -> str:
 
         return_elem = method.find('return')
         if return_elem is not None:
-            return_type = return_elem.get('type')
+            return_type = return_elem.get('type', 'void')
             content.append(f"\n- Returns: {return_type}")
 
     return '\n'.join(content)

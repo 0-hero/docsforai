@@ -1,40 +1,53 @@
 """
 Docusaurus documentation parser for DocsForAI.
+
+Requires:
+- Node.js, npm, plus a typical Docusaurus project setup.
 """
 
 import logging
 from pathlib import Path
-from typing import List, Dict, Any
+import shutil
+from typing import List, Dict, Any, Optional
 import json
 import subprocess
+from docsforai.converter.html_to_md import html_to_md
+from docsforai.utils import run_subprocess_with_logging
 
 logger = logging.getLogger(__name__)
 
-def parse_docusaurus(docs_path: Path) -> List[Dict[str, Any]]:
+def parse_docusaurus(docs_path: Path, npm_install_args: Optional[List[str]] = None, npm_build_args: Optional[List[str]] = None) -> List[Dict[str, Any]]:
     """
     Parse Docusaurus documentation.
 
     Args:
         docs_path (Path): Path to the Docusaurus documentation source.
+        npm_install_args (Optional[List[str]]): Additional arguments for npm install command.
+        npm_build_args (Optional[List[str]]): Additional arguments for npm run build command.
 
     Returns:
         List[Dict[str, Any]]: Parsed Docusaurus documentation.
 
     Raises:
-        FileNotFoundError: If docusaurus.config.js is not found.
+        FileNotFoundError: If neither docusaurus.config.js nor docusaurus.config.ts is found.
         json.JSONDecodeError: If sidebar.json is invalid.
         subprocess.CalledProcessError: If Docusaurus build fails.
     """
     logger.info(f"Parsing Docusaurus documentation at {docs_path}")
+    logger.debug(f"Received npm_install_args: {npm_install_args}")
+    logger.debug(f"Received npm_build_args: {npm_build_args}")
 
-    config_path = docs_path / 'docusaurus.config.js'
-    if not config_path.exists():
-        logger.error("docusaurus.config.js not found")
-        raise FileNotFoundError("docusaurus.config.js not found")
+    # Check for either .js or .ts config file
+    js_config_path = docs_path / 'docusaurus.config.js'
+    ts_config_path = docs_path / 'docusaurus.config.ts'
+    
+    if not js_config_path.exists() and not ts_config_path.exists():
+        logger.error("Neither docusaurus.config.js nor docusaurus.config.ts found")
+        raise FileNotFoundError("Neither docusaurus.config.js nor docusaurus.config.ts found")
 
     parsed_docs = []
 
-    # Parse sidebar.json for structure
+    # Parse sidebar.json
     sidebar_path = docs_path / 'sidebars.json'
     if sidebar_path.exists():
         try:
@@ -61,38 +74,31 @@ def parse_docusaurus(docs_path: Path) -> List[Dict[str, Any]]:
                     'content': content
                 })
 
-    # Build Docusaurus site to capture any additional files
     build_dir = docs_path / 'build'
     try:
-        subprocess.run(['npm', 'install'], cwd=str(docs_path), check=True)
-        subprocess.run(['npm', 'run', 'build'], cwd=str(docs_path), check=True)
+        # Install and build with detailed logging
+        logger.debug(f"Running npm install with args: {npm_install_args}")
+        run_subprocess_with_logging(['npm', 'install'], cwd=docs_path, additional_args=npm_install_args)
+        
+        logger.debug(f"Running npm run build with args: {npm_build_args}")
+        run_subprocess_with_logging(['npm', 'run', 'build'], cwd=docs_path, additional_args=npm_build_args)
 
-        # Parse any additional files in the build directory
+        # Parse built HTML
         for html_file in build_dir.rglob('*.html'):
             with html_file.open('r', encoding='utf-8') as f:
                 content = f.read()
                 parsed_docs.append({
                     'type': 'docusaurus_built',
                     'filename': html_file.relative_to(build_dir).as_posix(),
-                    'content': _html_to_markdown(content)
+                    'content': html_to_md(content)  # <--- real HTML -> MD conversion
                 })
 
     except subprocess.CalledProcessError as e:
-        logger.error(f"Docusaurus build failed: {str(e)}")
+        logger.error(f"Docusaurus build process failed")
         raise
     finally:
         # Clean up build directory
-        import shutil
+        # If you want to keep the built site, comment out the rmtree below
         shutil.rmtree(build_dir, ignore_errors=True)
 
     return parsed_docs
-
-def _html_to_markdown(html_content: str) -> str:
-    """
-    Convert HTML content to Markdown.
-
-    This is a placeholder function. In a real implementation, you would use
-    a library like html2text or beautifulsoup to convert HTML to Markdown.
-    """
-    # Placeholder implementation
-    return f"Converted Markdown: {html_content[:100]}..."
